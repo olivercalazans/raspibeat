@@ -1,1 +1,1 @@
-# raspibeat
+![LOGO](./images/raspibeat-logo.svg)
