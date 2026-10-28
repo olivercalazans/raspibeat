@@ -17,15 +17,48 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
-func main() {
-	fs := http.FileServer(http.Dir("./static"))
+type Music struct {
+	Name string `json:"name"`
+	File string `json:"file"`
+}
 
-	http.Handle("/", fs)
+func main() {
+	http.HandleFunc("/api/library", handleLibrary)
+
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 
 	log.Println("Servindo em http://0.0.0.0:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func handleLibrary(w http.ResponseWriter, r *http.Request) {
+	entries, err := os.ReadDir("./music")
+	if err != nil {
+		http.Error(w, "Unable to read the music folder", http.StatusInternalServerError)
+		return
+	}
+
+	var list []Music
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		ext := strings.ToLower(filepath.Ext(e.Name()))
+		if ext != ".mp3" && ext != ".flac" && ext != ".m4a" && ext != ".ogg" {
+			continue
+		}
+		name := strings.TrimSuffix(e.Name(), filepath.Ext(e.Name()))
+		list = append(list, Music{Name: name, File: e.Name()})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(list)
 }
