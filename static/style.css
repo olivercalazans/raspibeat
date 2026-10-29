@@ -1,27 +1,51 @@
-body {
-    font-family: system-ui, sans-serif; 
-    margin: 0; 
-    padding: 1rem;
-    background: #0f0f12; 
-    color: #eee; 
+body { 
+  font-family: system-ui, sans-serif; 
+  margin: 0; 
+  padding: 1rem;
+  background: #0f0f12; 
+  color: #eee; 
 }
 
 h1 { 
-    font-size: 1.4rem; 
+  font-size: 1.4rem; 
 }
 
 ul { 
-    list-style: none; 
-    padding: 0; 
-    margin: 0;
+  list-style: none; 
+  padding: 0; 
+  margin: 0; 
+  margin-bottom: 80px;
 }
 
 li { 
-    padding: .75rem 1rem; 
-    border-bottom: 1px solid #2a2a35; 
+  padding: .75rem 1rem; 
+  border-bottom: 1px solid #2a2a35; 
+  cursor: pointer; 
 }
 
-.empty { 
-    color: #888; 
-    padding: 1rem 0; 
+li:hover { 
+  background: #1a1a20; 
+}
+
+li.playing { 
+  background: #1e2a3a; 
+  color: #4a9eff; 
+  font-weight: bold; 
+}
+
+#player-container {
+  position: fixed; 
+  bottom: 0; 
+  left: 0; 
+  right: 0;
+  background: #1a1a20; 
+  padding: .5rem; 
+  border-top: 1px solid #2a2a35;
+  display: flex; 
+  justify-content: center;
+}
+
+audio { 
+  width: 100%; 
+  max-width: 600px; 
 }

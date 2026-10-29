@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RaspiBeat</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -12,6 +12,10 @@
   <h1>RaspiBeat</h1>
   <ul id="library"></ul>
 
-  <script src="./script.js"></script>
+  <div id="player-container">
+    <audio id="player" controls></audio>
+  </div>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
