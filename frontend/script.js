@@ -1,5 +1,7 @@
 const libraryEl = document.getElementById('library');
 const audioPlayer = document.getElementById('player');
+const fileInput = document.getElementById('file-upload');
+
 
 let tracks = [];
 let currentIndex = -1;
@@ -131,5 +133,47 @@ function updateMediaSession(track) {
 }
 
 
-// Initialize the app
+
+fileInput.addEventListener('change', async (e) => {
+  const files = e.target.files;
+  if (files.length === 0) return;
+
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append('files', files[i]);
+  }
+
+  // Visual feedback
+  const label = document.querySelector('.upload-btn');
+  const originalText = label.textContent;
+  label.textContent = 'Uploading...';
+  label.style.opacity = '0.7';
+  label.style.pointerEvents = 'none';
+
+  try {
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log(`Uploaded ${result.count} file(s).`);
+      
+      await loadLibrary(); 
+    } else {
+      alert("Upload failed.");
+    }
+  } catch (err) {
+    console.error("Upload error:", err);
+    alert("Upload error. Check the console.");
+  } finally {
+    label.textContent = originalText;
+    label.style.opacity = '1';
+    label.style.pointerEvents = 'auto';
+    fileInput.value = ''; 
+  }
+});
+
+
 loadLibrary();

@@ -18,6 +18,8 @@ package backend
 
 import (
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -74,4 +76,65 @@ func HandleStream(w http.ResponseWriter, r *http.Request) {
 	path 	 := filepath.Join("./music", safeFile)
 
 	http.ServeFile(w, r, path)
+}
+
+
+
+func HandleUpload(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// 50MB upload limit
+	err := r.ParseMultipartForm(50 << 20)
+	if err != nil {
+		http.Error(w, "File too large or invalid form", http.StatusBadRequest)
+		return
+	}
+
+	files := r.MultipartForm.File["files"]
+	if len(files) == 0 {
+		http.Error(w, "No files uploaded", http.StatusBadRequest)
+		return
+	}
+
+	allowedExts := map[string]bool{".mp3": true, ".flac": true, ".m4a": true, ".ogg": true}
+	uploaded    := 0
+
+	for _, fileHeader := range files {
+		ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
+		if !allowedExts[ext] { continue }
+
+		file, err := fileHeader.Open()
+		if err != nil { continue }
+
+		safeName := filepath.Base(fileHeader.Filename)
+		dstPath  := filepath.Join("./music", safeName)
+
+		dst, err := os.Create(dstPath)
+		
+		if err != nil {
+			file.Close()
+			log.Printf("Error creating file %s: %v", dstPath, err)
+			continue
+		}
+
+		if _, err := io.Copy(dst, file); err != nil {
+			log.Printf("Error saving file %s: %v", dstPath, err)
+		}
+		
+		dst.Close()
+		file.Close()
+		uploaded++
+
+		log.Printf("Uploaded file: %s", safeName)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"count":   uploaded,
+	})
 }

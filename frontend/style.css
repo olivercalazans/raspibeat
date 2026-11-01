@@ -49,3 +49,25 @@ audio {
   width: 100%; 
   max-width: 600px; 
 }
+
+
+
+/* UPLOAD BUTTON*/
+.upload-container {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.upload-btn {
+  background: #4a9eff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+.upload-btn:hover { background: #3585e6; }
+
+#file-upload { display: none; }

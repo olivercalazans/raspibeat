@@ -31,6 +31,8 @@ func main() {
 
 	http.HandleFunc("/api/library", backend.HandleLibrary)
 	http.HandleFunc("/stream", backend.HandleStream)
+	http.HandleFunc("/api/upload", backend.HandleUpload)
+	
 	http.Handle("/", http.FileServer(http.Dir("./frontend")))
 
 	log.Println("Serving on http://0.0.0.0:60888")
