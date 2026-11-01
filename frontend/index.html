@@ -1,26 +1,55 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#070506">
   <title>RaspiBeat</title>
+  <link class="icon" type="image/svg+xml" href="raspibeat-icon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <h1>RaspiBeat</h1>
-  
-  <div class="upload-container">
-    <label for="file-upload" class="upload-btn">+ Add Music</label>
-    <input id="file-upload" type="file" multiple accept=".mp3,.flac,.m4a,.ogg" />
-  </div>
-  
-  <ul id="library"></ul>
+  <header class="topbar">
+    <div class="brand">
+      <h1>
+        <img class="logo" src="raspibeat-logo.svg" alt="RaspiBeat" width="2103" height="748">
+      </h1>
+      <p class="subtitle" id="track-count">Loading library...</p>
+    </div>
 
-  <div id="player-container">
+    <div class="upload-container">
+      <label for="file-upload" class="upload-btn">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+        <span class="upload-text">Add</span>
+      </label>
+      <input id="file-upload" type="file" multiple accept=".mp3,.flac,.m4a,.ogg" />
+    </div>
+  </header>
+
+  <main>
+    <div class="list-head" aria-hidden="true">
+      <span>#</span>
+      <span>Title</span>
+    </div>
+    <ul id="library"></ul>
+  </main>
+
+  <footer id="player-container">
+    <div class="now-playing">
+      <span class="eq" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      <div class="now-text">
+        <span class="now-label">Now playing</span>
+        <span class="now-title" id="now-title" aria-live="polite">Nothing playing</span>
+      </div>
+    </div>
     <audio id="player" controls></audio>
-  </div>
+  </footer>
 
   <script src="script.js" defer></script>
 </body>
