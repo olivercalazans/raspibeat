@@ -1,6 +1,8 @@
 const libraryEl = document.getElementById('library');
 const audioPlayer = document.getElementById('player');
 const fileInput = document.getElementById('file-upload');
+const trackCountEl = document.getElementById('track-count');
+const nowTitleEl = document.getElementById('now-title');
 
 
 let tracks = [];
@@ -15,7 +17,8 @@ async function loadLibrary() {
     renderLibrary();
   } catch (error) {
     console.error("Failed to load library:", error);
-    libraryEl.innerHTML = '<li class="empty">Error loading library.</li>';
+    trackCountEl.textContent = 'offline';
+    libraryEl.innerHTML = '<li class="empty">Failed to load library.</li>';
   }
 }
 
@@ -23,19 +26,36 @@ async function loadLibrary() {
 // Render the track list in the DOM
 function renderLibrary() {
   libraryEl.innerHTML = '';
-  
+  trackCountEl.textContent = tracks.length + (tracks.length === 1 ? ' track' : ' tracks');
+
   if (tracks.length === 0) {
-    libraryEl.innerHTML = '<li class="empty">No tracks found.</li>';
+    libraryEl.innerHTML = '<li class="empty">No tracks found. Add some music to start.</li>';
     return;
   }
-  
+
   tracks.forEach((track, index) => {
     const li = document.createElement('li');
-    li.textContent = track.name;
-    
-    // Pass the track index to the play function
+    li.tabIndex = 0;
+
+    const num = document.createElement('span');
+    num.className = 'track-index';
+    num.textContent = String(index + 1).padStart(2, '0');
+
+    const name = document.createElement('span');
+    name.className = 'track-name';
+    name.textContent = track.name;
+
+    li.append(num, name);
+    li.classList.toggle('playing', index === currentIndex);
+
     li.addEventListener('click', () => playTrack(index));
-    
+    li.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        playTrack(index);
+      }
+    });
+
     libraryEl.appendChild(li);
   });
 }
@@ -44,44 +64,47 @@ function renderLibrary() {
 
 // Play a track by its index in the array
 function playTrack(index) {
-  // Validate the index bounds
   if (index < 0 || index >= tracks.length) {
-    return; 
+    return;
   }
 
   currentIndex = index;
   const track = tracks[index];
 
-  // Update UI highlighting
   const items = libraryEl.querySelectorAll('li');
   items.forEach((el, i) => {
     el.classList.toggle('playing', i === index);
   });
 
-  // Load and play the audio
+  nowTitleEl.textContent = track.name;
+
   audioPlayer.src = '/stream?file=' + encodeURIComponent(track.file);
   audioPlayer.play().catch(error => {
     console.error("Playback error:", error);
   });
 
-  // Update the Media Session API metadata and state
   updateMediaSession(track);
 }
+
+
+// Drive the equalizer animation from the real playback state
+audioPlayer.addEventListener('play', () => document.body.classList.add('is-playing'));
+audioPlayer.addEventListener('pause', () => document.body.classList.remove('is-playing'));
 
 
 // Listen for the 'ended' event to automatically play the next track
 audioPlayer.addEventListener('ended', () => {
   const nextIndex = currentIndex + 1;
-  
+
   if (nextIndex < tracks.length) {
     playTrack(nextIndex);
   } else {
-    // If it was the last track, clear the visual state
     console.log("End of playlist.");
     libraryEl.querySelectorAll('li').forEach(el => el.classList.remove('playing'));
     currentIndex = -1;
-    
-    // Update Media Session state to none
+    nowTitleEl.textContent = 'Nothing playing';
+    document.body.classList.remove('is-playing');
+
     if ('mediaSession' in navigator) {
       navigator.mediaSession.playbackState = 'none';
     }
@@ -101,7 +124,6 @@ function updateMediaSession(track) {
 
     navigator.mediaSession.playbackState = 'playing';
 
-    // Connect lock screen buttons to player actions
     navigator.mediaSession.setActionHandler('play', () => {
       audioPlayer.play();
       navigator.mediaSession.playbackState = 'playing';
@@ -118,14 +140,12 @@ function updateMediaSession(track) {
         playTrack(nextIndex);
       }
     });
-    
-    // Optional: Add previous track handler
+
     navigator.mediaSession.setActionHandler('previoustrack', () => {
       const prevIndex = currentIndex - 1;
       if (prevIndex >= 0) {
         playTrack(prevIndex);
       } else {
-        // If it's the first track, just restart it
         audioPlayer.currentTime = 0;
       }
     });
@@ -143,10 +163,10 @@ fileInput.addEventListener('change', async (e) => {
     formData.append('files', files[i]);
   }
 
-  // Visual feedback
   const label = document.querySelector('.upload-btn');
-  const originalText = label.textContent;
-  label.textContent = 'Uploading...';
+  const labelText = label.querySelector('.upload-text');
+  const originalText = labelText.textContent;
+  labelText.textContent = 'Uploading...';
   label.style.opacity = '0.7';
   label.style.pointerEvents = 'none';
 
@@ -159,8 +179,8 @@ fileInput.addEventListener('change', async (e) => {
     if (response.ok) {
       const result = await response.json();
       console.log(`Uploaded ${result.count} file(s).`);
-      
-      await loadLibrary(); 
+
+      await loadLibrary();
     } else {
       alert("Upload failed.");
     }
@@ -168,10 +188,10 @@ fileInput.addEventListener('change', async (e) => {
     console.error("Upload error:", err);
     alert("Upload error. Check the console.");
   } finally {
-    label.textContent = originalText;
+    labelText.textContent = originalText;
     label.style.opacity = '1';
     label.style.pointerEvents = 'auto';
-    fileInput.value = ''; 
+    fileInput.value = '';
   }
 });
 
