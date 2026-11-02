@@ -3,11 +3,48 @@ const audioPlayer = document.getElementById('player');
 const fileInput = document.getElementById('file-upload');
 const trackCountEl = document.getElementById('track-count');
 const nowTitleEl = document.getElementById('now-title');
-
+const uploadBtn = document.getElementById('upload-btn');
+const repeatBtn = document.getElementById('repeat-toggle');
 
 let tracks = [];
 let currentIndex = -1;
 
+// Repeat modes: 'off' (Play to end), 'all' (Repeat playlist), 'one' (Repeat single track)
+let repeatMode = 'off';
+
+if (repeatBtn) {
+  repeatBtn.addEventListener('click', () => {
+    if (repeatMode === 'off') {
+      repeatMode = 'all';
+    } else if (repeatMode === 'all') {
+      repeatMode = 'one';
+    } else {
+      repeatMode = 'off';
+    }
+    updateRepeatBtnUI();
+  });
+}
+
+function updateRepeatBtnUI() {
+  if (!repeatBtn) return;
+  repeatBtn.className = `repeat-btn mode-${repeatMode}`;
+  const icon = repeatBtn.querySelector('svg');
+  const text = repeatBtn.querySelector('.repeat-text');
+
+  if (repeatMode === 'off') {
+    repeatBtn.title = "Mode: Play through to end (No repeat)";
+    text.textContent = "End";
+    icon.innerHTML = `<path d="M5 12h14M13 5l7 7-7 7"/>`;
+  } else if (repeatMode === 'all') {
+    repeatBtn.title = "Mode: Repeat all tracks";
+    text.textContent = "All";
+    icon.innerHTML = `<path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>`;
+  } else if (repeatMode === 'one') {
+    repeatBtn.title = "Mode: Repeat current track";
+    text.textContent = "1";
+    icon.innerHTML = `<path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/><path d="M11 10h1v4"/>`;
+  }
+}
 
 // Fetch the track list from the backend
 async function loadLibrary() {
@@ -21,7 +58,6 @@ async function loadLibrary() {
     libraryEl.innerHTML = '<li class="empty">Failed to load library.</li>';
   }
 }
-
 
 // Render the track list in the DOM
 function renderLibrary() {
@@ -60,8 +96,6 @@ function renderLibrary() {
   });
 }
 
-
-
 // Play a track by its index in the array
 function playTrack(index) {
   if (index < 0 || index >= tracks.length) {
@@ -86,19 +120,29 @@ function playTrack(index) {
   updateMediaSession(track);
 }
 
-
 // Drive the equalizer animation from the real playback state
 audioPlayer.addEventListener('play', () => document.body.classList.add('is-playing'));
 audioPlayer.addEventListener('pause', () => document.body.classList.remove('is-playing'));
 
-
-// Listen for the 'ended' event to automatically play the next track
+// Listen for the 'ended' event to handle playback options
 audioPlayer.addEventListener('ended', () => {
+  if (repeatMode === 'one') {
+    // 1. Repeat single track
+    audioPlayer.currentTime = 0;
+    audioPlayer.play().catch(console.error);
+    return;
+  }
+
   const nextIndex = currentIndex + 1;
 
   if (nextIndex < tracks.length) {
+    // Play next track in list
     playTrack(nextIndex);
+  } else if (repeatMode === 'all' && tracks.length > 0) {
+    // 2. Repeat all tracks (restart playlist)
+    playTrack(0);
   } else {
+    // 3. Play through to end (stop playback)
     console.log("End of playlist.");
     libraryEl.querySelectorAll('li').forEach(el => el.classList.remove('playing'));
     currentIndex = -1;
@@ -110,8 +154,6 @@ audioPlayer.addEventListener('ended', () => {
     }
   }
 });
-
-
 
 // Setup Media Session API for background play and lock screen controls
 function updateMediaSession(track) {
@@ -138,6 +180,8 @@ function updateMediaSession(track) {
       const nextIndex = currentIndex + 1;
       if (nextIndex < tracks.length) {
         playTrack(nextIndex);
+      } else if (repeatMode === 'all' && tracks.length > 0) {
+        playTrack(0);
       }
     });
 
@@ -152,8 +196,6 @@ function updateMediaSession(track) {
   }
 }
 
-
-
 fileInput.addEventListener('change', async (e) => {
   const files = e.target.files;
   if (files.length === 0) return;
@@ -163,12 +205,12 @@ fileInput.addEventListener('change', async (e) => {
     formData.append('files', files[i]);
   }
 
-  const label = document.querySelector('.upload-btn');
-  const labelText = label.querySelector('.upload-text');
+  const labelText = uploadBtn.querySelector('.upload-text');
   const originalText = labelText.textContent;
+
+  // Activate upload visual state (spinner)
+  uploadBtn.classList.add('is-uploading');
   labelText.textContent = 'Uploading...';
-  label.style.opacity = '0.7';
-  label.style.pointerEvents = 'none';
 
   try {
     const response = await fetch('/api/upload', {
@@ -188,12 +230,10 @@ fileInput.addEventListener('change', async (e) => {
     console.error("Upload error:", err);
     alert("Upload error. Check the console.");
   } finally {
+    uploadBtn.classList.remove('is-uploading');
     labelText.textContent = originalText;
-    label.style.opacity = '1';
-    label.style.pointerEvents = 'auto';
     fileInput.value = '';
   }
 });
-
 
 loadLibrary();

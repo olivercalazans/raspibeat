@@ -14,16 +14,17 @@
   <header class="topbar">
     <div class="brand">
       <h1>
-        <img class="logo" src="raspibeat-logo.svg" alt="RaspiBeat" width="2103" height="748">
+        <span class="logo-text">RaspiBeat</span>
       </h1>
       <p class="subtitle" id="track-count">Loading library...</p>
     </div>
 
     <div class="upload-container">
-      <label for="file-upload" class="upload-btn">
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+      <label for="file-upload" class="upload-btn" id="upload-btn">
+        <svg class="upload-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
           <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
         </svg>
+        <span class="spinner" aria-hidden="true"></span>
         <span class="upload-text">Add</span>
       </label>
       <input id="file-upload" type="file" multiple accept=".mp3,.flac,.m4a,.ogg" />
@@ -47,6 +48,14 @@
         <span class="now-label">Now playing</span>
         <span class="now-title" id="now-title" aria-live="polite">Nothing playing</span>
       </div>
+
+      <!-- Triple Repeat Button -->
+      <button id="repeat-toggle" class="repeat-btn mode-off" title="Mode: Play through to end (No repeat)" aria-label="Repeat mode">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 5l7 7-7 7"/>
+        </svg>
+        <span class="repeat-text">End</span>
+      </button>
     </div>
     <audio id="player" controls></audio>
   </footer>

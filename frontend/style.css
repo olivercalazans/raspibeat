@@ -56,14 +56,15 @@ body {
 
 h1 {
   margin: 0;
-  line-height: 0;
+  line-height: 1;
 }
 
-.logo {
+.logo-text {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.03em;
   display: block;
-  height: 44px;
-  width: auto;
-  max-width: 100%;
 }
 
 .subtitle {
@@ -97,6 +98,34 @@ h1 {
 }
 
 .upload-btn:active { transform: scale(0.97); }
+
+/* Animação do Spinner de Upload */
+.spinner {
+  display: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.upload-btn.is-uploading {
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.upload-btn.is-uploading .upload-icon {
+  display: none;
+}
+
+.upload-btn.is-uploading .spinner {
+  display: inline-block;
+}
 
 #file-upload {
   position: absolute;
@@ -262,6 +291,39 @@ li.empty:hover { background: transparent; }
 
 body.is-playing .now-title { color: var(--accent-hover); }
 
+/* REPEAT BUTTON */
+.repeat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--mono);
+  transition: all 0.2s ease;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.repeat-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+  border-color: var(--accent-dim);
+}
+
+.repeat-btn.mode-all,
+.repeat-btn.mode-one {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
 /* Animated equalizer */
 .eq {
   display: flex;
@@ -321,7 +383,7 @@ audio::-webkit-media-controls-panel {
 }
 
 @media (max-width: 420px) {
-  .logo { height: 36px; }
+  .logo-text { font-size: 1.35rem; }
   .upload-text { display: none; }
   .upload-btn { padding: 0.6rem; }
 }
