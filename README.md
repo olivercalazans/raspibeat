@@ -1,31 +1,51 @@
 ![LOGO](./images/raspibeat-logo.svg)
 
-A lightweight, self-hosted music central built with Go and Vanilla JavaScript, designed to run smoothly on a Raspberry Pi Zero W. 
+<div align="center">
+   <img src="./images/raspibeat.png" />
+</div>
 
-RaspiBeat scans your local music folder and provides a clean web interface to stream and control your music from any device (phone, tablet, or PC) connected to your local network.
+<br>
 
-## ✨ Features
+A lightweight, self-hosted local music server built with **Go** and **Vanilla JavaScript**, specifically engineered to run with minimal overhead on low-power hardware like the Raspberry Pi Zero W.
 
-- **Local Library Scanning:** Automatically detects audio files (`.mp3`, `.flac`, `.m4a`, `.ogg`) from a local folder.
-- **HTTP Streaming:** Efficient audio streaming using HTTP Range Requests. This allows you to seek (skip forward/backward) without downloading the entire file, keeping the Raspberry Pi's RAM usage extremely low.
-- **Auto-Play Next:** Automatically plays the next track in the list when the current one ends.
-- **Media Session API:** Integrates with the operating system's media controls. Allows background playback and provides playback controls (Play, Pause, Next, Previous) on your phone's lock screen or notification center.
-- **Zero Dependencies (Frontend):** Built with pure HTML, CSS, and Vanilla JavaScript. No React, Vue, or npm required.
+RaspiBeat features an intentionally minimalist interface designed exclusively for local network use. It strictly provides what is necessary: a clean track listing, lightweight audio playback, and a single button to add new songs to the server. By keeping the design bare-bones and avoiding frontend frameworks, resource usage on the Raspberry Pi is kept as low as possible.
 
-## 🛠️ Tech Stack
+<br>
+
+## Features
+
+- **Minimalist & Resource-Efficient:** Purpose-built for local use with zero framework bloat. The simple layout keeps CPU and RAM usage on the Raspberry Pi strictly to a minimum.
+
+- **Web Upload (`+ Add` Button):** Quickly upload new audio files directly to the server from any device on your local network.
+
+- **Local Library Scanning:** Automatically indexes your audio tracks (`.mp3`, `.flac`, `.m4a`, `.ogg`) stored on the server.
+
+- **HTTP Audio Streaming:** Built with Go's `http.ServeFile` using HTTP Range Requests. Allows instant seeking (skipping forward/backward) without excessive buffering or memory spikes.
+
+- **Auto-Play Next:** Automatically starts playing the next song in your library when the current track finishes.
+
+- **Media Session API:** Integrates directly with your device's native media controls (lock screen, control center, and hardware play/pause keys).
+
+- **Zero Dependencies (Frontend):** Written in pure HTML5, CSS3, and Vanilla JavaScript—no npm, React, Vue, or build steps required.
+
+<br>
+
+## Tech Stack
 
 - **Backend:** Go (Standard Library only)
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript
-- **Streaming:** `http.ServeFile` (built-in Range Request support)
+- **Streaming:** `http.ServeFile` (native Range Request support)
 
-## 🚀 Getting Started
+<br>
+
+## Getting Started
 
 ### Prerequisites
 
-- [Go](https://go.dev/doc/install) (version 1.21 or higher)
-- A local network (the device you access the web page from must be on the same Wi-Fi/LAN as the server).
+- [Go](https://go.dev/doc/install) (version 1.25 or higher)
+- A local network (your device and the Raspberry Pi must be connected to the same Wi-Fi/LAN).
 
-### Installation & Running
+### Installation, Building & Running
 
 1. **Clone the repository:**
    ```bash
@@ -33,31 +53,33 @@ RaspiBeat scans your local music folder and provides a clean web interface to st
    cd raspibeat
    ```
 
-2. **Add your music:**
-   Create a folder named `music` in the root of the project and drop your audio files inside:
+2. **Compile the binary:**
+   Build the executable file:
    ```bash
-   mkdir music
-   # Copy your .mp3 files into the music folder
+   go build -o raspibeat .
    ```
 
 3. **Run the server:**
+   Execute the compiled binary:
    ```bash
-   go run .
+   ./raspibeat
    ```
 
 4. **Access the interface:**
-   Open your browser and go to:
-   - On the same machine: `http://localhost:60888`
-   - From your phone/PC: `http://<IP_ADDRESS_OF_YOUR_PI>:60888`
+   Open your browser and navigate to:
+   - On the host machine: `http://localhost:60888`
+   - From any phone/PC on the network: `http://<IP_ADDRESS_OF_YOUR_PI>:60888`
 
-## 🔌 API Endpoints
+<br>
 
-The backend exposes two simple API endpoints consumed by the frontend:
+## API Endpoints
 
-- `GET /api/library`: Returns a JSON array of available tracks.
-- `GET /stream?file=<filename>`: Streams the requested audio file with support for HTTP Range Requests.
+- `GET /api/library`: Returns a JSON array of all available tracks.
+- `GET /stream?file=<filename>`: Streams the requested audio file using HTTP Range Requests.
+- `POST /upload`: Handles track uploads triggered by the `+ Add` button.
 
+<br>
 
-## 📄 License
+## License
 
 This project is open-source and available under the [Apache-2.0 License](LICENSE).
